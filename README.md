@@ -6,7 +6,7 @@ Usage:
 ```
  var client = RestClientFactory<IRestResponse>.Create(TimeoutAndRetryPolicy.Build(3, 10, 60));
             client.BaseUrl = new Uri("");
-            var request = new RestRequest(Config.RequestMethod);
+            var request = new RestRequest(Method.GET);
             request.AddJsonBody(model);
             var response = client.Execute(request);
 ```
