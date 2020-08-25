@@ -1,13 +1,13 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2035
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestSharpPolly", "..\..\..\Documents\Code\RestSharpPolly\RestSharpPolly\RestSharpPolly.csproj", "{712C8CAD-28C3-4DC8-8C56-AE511FE7BFAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestSharpPolly", "RestSharpPolly\RestSharpPolly.csproj", "{8716D9CF-BCDB-4CB5-BC33-F2BFC1802F72}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestSharpPolly.Test", "..\..\..\Documents\Code\RestSharpPolly\RestSharpPolly.Test\RestSharpPolly.Test.csproj", "{2B45DAE9-B98F-41EA-8941-0582463AC21D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestSharpPolly.Test", "RestSharpPolly.Test\RestSharpPolly.Test.csproj", "{FBB7C57F-F878-4252-B642-A5BEAFEFB0F4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "..\..\..\Documents\Code\RestSharpPolly\ConsoleApp2\ConsoleApp2.csproj", "{A71ACD8F-E8D4-4511-86F0-4F8338988BCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{3ADAEB2F-233B-477A-9042-8A6B481E40E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,23 +15,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{712C8CAD-28C3-4DC8-8C56-AE511FE7BFAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{712C8CAD-28C3-4DC8-8C56-AE511FE7BFAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{712C8CAD-28C3-4DC8-8C56-AE511FE7BFAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{712C8CAD-28C3-4DC8-8C56-AE511FE7BFAF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2B45DAE9-B98F-41EA-8941-0582463AC21D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2B45DAE9-B98F-41EA-8941-0582463AC21D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2B45DAE9-B98F-41EA-8941-0582463AC21D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2B45DAE9-B98F-41EA-8941-0582463AC21D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A71ACD8F-E8D4-4511-86F0-4F8338988BCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A71ACD8F-E8D4-4511-86F0-4F8338988BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A71ACD8F-E8D4-4511-86F0-4F8338988BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A71ACD8F-E8D4-4511-86F0-4F8338988BCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8716D9CF-BCDB-4CB5-BC33-F2BFC1802F72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8716D9CF-BCDB-4CB5-BC33-F2BFC1802F72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8716D9CF-BCDB-4CB5-BC33-F2BFC1802F72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8716D9CF-BCDB-4CB5-BC33-F2BFC1802F72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBB7C57F-F878-4252-B642-A5BEAFEFB0F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBB7C57F-F878-4252-B642-A5BEAFEFB0F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBB7C57F-F878-4252-B642-A5BEAFEFB0F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBB7C57F-F878-4252-B642-A5BEAFEFB0F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ADAEB2F-233B-477A-9042-8A6B481E40E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ADAEB2F-233B-477A-9042-8A6B481E40E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ADAEB2F-233B-477A-9042-8A6B481E40E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ADAEB2F-233B-477A-9042-8A6B481E40E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BD62EDD5-73ED-4FDB-AF24-126EF3988995}
+		SolutionGuid = {8FDC92BD-36E5-4C04-AA4D-AC27BC71AABC}
 	EndGlobalSection
 EndGlobal

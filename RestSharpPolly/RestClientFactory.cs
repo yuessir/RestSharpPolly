@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Cache;
 using System.Net.Security;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -134,22 +133,23 @@ namespace RestSharpPolly
 
         public RestRequestAsyncHandle ExecuteAsyncGet(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncGet(request, callback, httpMethod);
+
         }
 
         public RestRequestAsyncHandle ExecuteAsyncPost(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncPost(request, callback, httpMethod);
         }
 
         public RestRequestAsyncHandle ExecuteAsyncGet<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncGet(request, callback, httpMethod);
         }
 
         public RestRequestAsyncHandle ExecuteAsyncPost<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncPost(request, callback, httpMethod);
         }
 
         public void ConfigureWebRequest(Action<HttpWebRequest> configurator)
@@ -246,17 +246,29 @@ namespace RestSharpPolly
 
         public Task<IRestResponse<T>> ExecuteGetTaskAsync<T>(IRestRequest request, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicy)
+                return null;
+            return _pollyRetAsyncPolicy.ExecuteAsync(() => _innerService.ExecuteGetTaskAsync<T>(request, token));
         }
 
         public Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicy)
+                return null;
+            return _pollyRetAsyncPolicy.ExecuteAsync(() => _innerService.ExecutePostTaskAsync<T>(request));
         }
 
         public Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicy)
+                return null;
+            return _pollyRetAsyncPolicy.ExecuteAsync(() => _innerService.ExecutePostTaskAsync<T>(request, token));
         }
 
         public Task<IRestResponse> ExecuteTaskAsync(IRestRequest request, CancellationToken token)
@@ -316,7 +328,11 @@ namespace RestSharpPolly
 
         public Task<IRestResponse> ExecutePostTaskAsync(IRestRequest request, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicy)
+                return null;
+            return _pollyRetAsyncPolicy.ExecuteAsync(() => _innerService.ExecutePostTaskAsync(request, token));
         }
 
         public CookieContainer CookieContainer

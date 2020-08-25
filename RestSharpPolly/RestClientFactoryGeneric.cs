@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Cache;
 using System.Net.Security;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Polly;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -135,22 +133,22 @@ namespace RestSharpPolly
 
         public RestRequestAsyncHandle ExecuteAsyncGet(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncGet(request, callback, httpMethod);
         }
 
         public RestRequestAsyncHandle ExecuteAsyncPost(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncPost(request, callback, httpMethod);
         }
 
         public RestRequestAsyncHandle ExecuteAsyncGet<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncGet(request, callback, httpMethod);
         }
 
         public RestRequestAsyncHandle ExecuteAsyncPost<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback, string httpMethod)
         {
-            throw new NotImplementedException();
+            return _innerService.ExecuteAsyncPost(request, callback, httpMethod);
         }
 
         public void ConfigureWebRequest(Action<HttpWebRequest> configurator)
@@ -245,19 +243,31 @@ namespace RestSharpPolly
             return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync<T>(request));
         }
 
-        public Task<IRestResponse<T>> ExecuteGetTaskAsync<T>(IRestRequest request, CancellationToken token)
+        public async Task<IRestResponse<T>> ExecuteGetTaskAsync<T>(IRestRequest request, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicyGeneric)
+                return null;
+            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync<T>(request, token));
         }
 
-        public Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request)
+        public async  Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicyGeneric)
+                return null;
+            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync<T>(request));
         }
 
-        public Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request, CancellationToken token)
+        public async Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicyGeneric)
+                return null;
+            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostTaskAsync<T>(request, token));
         }
 
         public async Task<IRestResponse> ExecuteTaskAsync(IRestRequest request, CancellationToken token)
@@ -314,9 +324,14 @@ namespace RestSharpPolly
             return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostTaskAsync(request));
         }
 
-        public Task<IRestResponse> ExecutePostTaskAsync(IRestRequest request, CancellationToken token)
+        public async  Task<IRestResponse> ExecutePostTaskAsync(IRestRequest request, CancellationToken token)
         {
-            throw new NotImplementedException();
+            if (null == request)
+                return null;
+            if (null == _pollyRetAsyncPolicyGeneric)
+                return null;
+            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostTaskAsync(request, token));
+
         }
 
         public CookieContainer CookieContainer
@@ -410,10 +425,7 @@ namespace RestSharpPolly
             set => _innerService.UnsafeAuthenticatedConnectionSharing = value;
         }
 
-        public IList<Parameter> DefaultParameters
-        {
-            get => _innerService.DefaultParameters;
-        }
+        public IList<Parameter> DefaultParameters => _innerService.DefaultParameters;
 
         public string BaseHost
         {
