@@ -86,7 +86,9 @@ namespace RestSharpPolly
                 return null;
             if (null == _pollyRetPolicy)
                 return null;
+            
             return _pollyRetPolicy.Execute(() => _innerService.Execute(request));
+
         }
 
         public IRestResponse Execute(IRestRequest request, Method httpMethod)

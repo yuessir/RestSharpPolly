@@ -18,6 +18,7 @@ namespace RestSharpPolly.Test
 
             client.BaseUrl = new Uri("https://httpstat.us/500");
             IRestRequest request = new RestRequest(Method.GET);
+            //if runtime have errors ,it will retry.
             var response = client.Execute(request);
             Assert.Equal(500, (int)response.StatusCode);
         }

@@ -90,19 +90,39 @@ namespace ConsoleApp2
             var asyncPolicy = BuildTimeoutAndRetryAsyncPolicy(3, 2, 10);
             var asyncPolicy2 = BuildTimeoutAndRetryAsyncPolicy2(3, 2, 10);
             var asyncPolicy3 = BuildTimeoutAndRetryAsyncPolicy3(3, 2, 10);
-            var client = RestClientFactory.Create(asyncPolicy);//TimeoutAndRetryPolicy.Build(1, 1, 1)
-                                                               // var client2 = RestClientFactory<IRestResponse>.Create(asyncPolicy2);
-                                                               // var client3 = RestClientFactory<IRestResponse<QueryResult>>.Create(asyncPolicy3);
+            var client = RestClientFactory.Create(asyncPolicy);
+           
+            // var client2 = RestClientFactory<IRestResponse>.Create(asyncPolicy2);
+            // var client3 = RestClientFactory<IRestResponse<QueryResult>>.Create(asyncPolicy3);
+
+            var syncPolicy2 = BuildTimeoutAndRetryPolicy(3, 2, 10);
+            var client2 = RestClientFactory.Create(syncPolicy2);
+            IRestRequest request2 = new RestRequest(Method.GET);
+            //client2.BaseUrl = new Uri("https://httpstat.us/500");
+            //if runtime have errors ,it will retry.
+            var response4 = client2.Execute(request2);
+            Console.ReadKey();
+
             IRestRequest request = new RestRequest(Method.GET);
             client.BaseUrl = new Uri("https://httpstat.us/500");
             //client2.BaseUrl = new Uri("https://httpstat.us/500");//
-            // client3.BaseUrl = new Uri("https://httpbin.org/anything");
+            //client3.BaseUrl = new Uri("https://httpbin.org/anything");
 
             var response = await client.ExecuteTaskAsync(request);
 
             //var response2 = await client2.ExecuteTaskAsync(request);
             // var response3 = await client3.ExecuteTaskAsync<QueryResult>(request);
-            Console.Read();
+            Console.ReadKey();
+
+            var syncPolicy = BuildTimeoutAndRetryPolicy2(3, 2, 10);
+            var client1 = RestClientFactory<IRestResponse>.Create(syncPolicy);
+            IRestRequest request1 = new RestRequest(Method.GET);
+            client1.BaseUrl = new Uri("https://httpstat.us/500");
+            var response5 = client1.Execute(request1);
+            Console.ReadKey();
+
+
+
         }
 
         public static ISyncPolicy<IRestResponse> BuildTimeoutAndRetryPolicy2(int retryNumber, int retrySleep, int timeoutSeconds)
@@ -214,5 +234,6 @@ namespace ConsoleApp2
 
             return Policy.WrapAsync(retry, timeout);
         }
+
     }
 }
