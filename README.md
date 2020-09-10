@@ -14,3 +14,14 @@ The class RestClientFactory is generic.
 ```
 RestClientFactory<TResult> Create(ISyncPolicy<TResult> syncPolicy)
 ```
+
+
+
+# Install
+Import Ant Design Blazor into an existing project
+
+    Go to the project folder of the application and install the Nuget package reference
+
+    $ dotnet add package RestSharpPolly
+
+
