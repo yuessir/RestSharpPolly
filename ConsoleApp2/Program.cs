@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using RestSharpPolly;
-using RestSharpPolly.PolicyProivders;
+using RestSharpPolly.PolicyProviders;
 using Newtonsoft.Json;
 using Polly;
 using RestSharp;

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using Polly;
 using RestSharp;
 
-namespace RestSharpPolly.PolicyProivders
+namespace RestSharpPolly.PolicyProviders
 {
-    /// <summary>   A timeout and retry policy. </summary>
+    /// <summary>
+    /// A timeout and retry policy.
+    /// </summary>
     public class TimeoutAndRetryPolicy
     {
         public static ISyncPolicy<IRestResponse> Build(int retryNumber, int retrySleep, int timeoutSeconds)
