@@ -85,22 +85,50 @@ namespace RestSharpPolly
 
         public IRestResponse Execute(IRestRequest request)
         {
-            return _innerService.Execute(request);
+            if (null == _pollyRetPolicyGeneric)
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
+            return _pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.Execute(request);
+            });
         }
 
         public IRestResponse Execute(IRestRequest request, Method httpMethod)
         {
-            return _innerService.Execute(request, httpMethod);
+            if (null == _pollyRetPolicyGeneric)
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
+            return _pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.Execute(request, httpMethod);
+            });
         }
 
         public IRestResponse<T> Execute<T>(IRestRequest request)
         {
-            return (IRestResponse<T>)_innerService.Execute(request);
+            if (null == _pollyRetPolicyGeneric)
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
+            return (IRestResponse<T>)_pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.Execute(request);
+            });
         }
 
         public IRestResponse<T> Execute<T>(IRestRequest request, Method httpMethod)
         {
-            return (IRestResponse<T>)_innerService.Execute(request, httpMethod);
+            if (null == _pollyRetPolicyGeneric)
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
+            return (IRestResponse<T>)_pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.Execute(request, httpMethod);
+            });
         }
 
         public byte[] DownloadData(IRestRequest request)
@@ -140,134 +168,157 @@ namespace RestSharpPolly
 
         public IRestResponse ExecuteAsGet(IRestRequest request, string httpMethod)
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
 
-            return _pollyRetPolicyGeneric.Execute(() => (TResult)_innerService.ExecuteAsGet(request, httpMethod));
+            return _pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.ExecuteAsGet(request, httpMethod);
+            });
         }
 
         public IRestResponse ExecuteAsPost(IRestRequest request, string httpMethod)
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
 
-            return _pollyRetPolicyGeneric.Execute(() => (TResult)_innerService.ExecuteAsPost(request, httpMethod));
+            return _pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.ExecuteAsPost(request, httpMethod);
+            });
         }
 
         public IRestResponse<T> ExecuteAsGet<T>(IRestRequest request, string httpMethod)
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
 
-            return (IRestResponse<T>)_pollyRetPolicyGeneric.Execute(() => (TResult)_innerService.ExecuteAsGet<T>(request, httpMethod));
+            return (IRestResponse<T>)_pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.ExecuteAsGet<T>(request, httpMethod);
+            });
         }
 
         public IRestResponse<T> ExecuteAsPost<T>(IRestRequest request, string httpMethod)
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetPolicyGeneric) + " is  null");
 
-            return (IRestResponse<T>)_pollyRetPolicyGeneric.Execute(() => (TResult)_innerService.ExecuteAsPost<T>(request, httpMethod));
+            return (IRestResponse<T>)_pollyRetPolicyGeneric.Execute(() =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) _innerService.ExecuteAsPost<T>(request, httpMethod);
+            });
         }
 
         public async Task<IRestResponse<T>> ExecuteAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
 
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteAsync<T>(request, cancellationToken));
+            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecuteAsync<T>(request, cancellationToken);
+            });
         }
 
         public async Task<IRestResponse<T>> ExecuteAsync<T>(IRestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
 
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteAsync<T>(request, httpMethod, cancellationToken));
+            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecuteAsync<T>(request, httpMethod, cancellationToken);
+            });
         }
 
         public async Task<IRestResponse> ExecuteAsync(IRestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
 
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteAsync(request, httpMethod, cancellationToken));
+            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecuteAsync(request, httpMethod, cancellationToken);
+            });
         }
 
         public async Task<IRestResponse> ExecuteAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
 
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteAsync(request, cancellationToken));
+            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecuteAsync(request, cancellationToken);
+            });
         }
 
         public async Task<IRestResponse<T>> ExecuteGetAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
 
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetAsync<T>(request, cancellationToken));
+            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecuteGetAsync<T>(request, cancellationToken);
+            });
         }
 
         public async Task<IRestResponse<T>> ExecutePostAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
 
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostAsync<T>(request, cancellationToken));
+            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecutePostAsync<T>(request, cancellationToken);
+            });
         }
 
         public async Task<IRestResponse> ExecuteGetAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
 
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetAsync(request, cancellationToken));
+            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecuteGetAsync(request, cancellationToken);
+            });
         }
 
         public async Task<IRestResponse> ExecutePostAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (null == request)
-                return null;
-
             if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostAsync(request, cancellationToken));
+                throw new AggregateException(nameof(_pollyRetAsyncPolicyGeneric) + " is  null");
+            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () =>
+            {
+                if (null == request)
+                    throw new AggregateException(nameof(request) + " is  null");
+                return (TResult) await _innerService.ExecutePostAsync(request, cancellationToken);
+            });
         }
 
         public CookieContainer CookieContainer

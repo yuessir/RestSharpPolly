@@ -50,7 +50,7 @@ namespace ConsoleApp2
         [JsonProperty("User-Agent")]
         public string UserAgent { get; set; }
     }
-
+    [Obsolete("see response content from https://httpstat.us/500 ")]
     public class QueryResult
     {
         [JsonProperty("args")]
@@ -80,6 +80,15 @@ namespace ConsoleApp2
         [JsonProperty("url")]
         public string Url { get; set; }
     }
+    public class QueryResultModel
+    {
+
+        [JsonProperty("code")]
+        public int code { get; set; }
+
+        [JsonProperty("description")]
+        public string description { get; set; }
+    }
 
     internal static class Program
     {
@@ -87,41 +96,49 @@ namespace ConsoleApp2
 
         private static async Task Main(string[] args)
         {
-            var asyncPolicy = BuildTimeoutAndRetryAsyncPolicy(3, 2, 10);
+
+
+            // To uncomment to try
+            //async
             var asyncPolicy2 = BuildTimeoutAndRetryAsyncPolicy2(3, 2, 10);
-            var asyncPolicy3 = BuildTimeoutAndRetryAsyncPolicy3(3, 2, 10);
-            var client = RestClientFactory.Create(asyncPolicy);
-           
-            // var client2 = RestClientFactory<IRestResponse>.Create(asyncPolicy2);
-            // var client3 = RestClientFactory<IRestResponse<QueryResult>>.Create(asyncPolicy3);
-
-            var syncPolicy2 = BuildTimeoutAndRetryPolicy(3, 2, 10);
-            var client2 = RestClientFactory.Create(syncPolicy2);
-            IRestRequest request2 = new RestRequest(Method.GET);
-            //client2.BaseUrl = new Uri("https://httpstat.us/500");
-            //if runtime have errors ,it will retry.
-            var response4 = client2.Execute(request2);
-            Console.ReadKey();
-
-            IRestRequest request = new RestRequest(Method.GET);
-            client.BaseUrl = new Uri("https://httpstat.us/500");
-            //client2.BaseUrl = new Uri("https://httpstat.us/500");//
-            //client3.BaseUrl = new Uri("https://httpbin.org/anything");
-
-            var response = await client.ExecuteTaskAsync(request);
-
-            //var response2 = await client2.ExecuteTaskAsync(request);
-            // var response3 = await client3.ExecuteTaskAsync<QueryResult>(request);
-            Console.ReadKey();
-
-            var syncPolicy = BuildTimeoutAndRetryPolicy2(3, 2, 10);
-            var client1 = RestClientFactory<IRestResponse>.Create(syncPolicy);
+            var client1 = RestClientFactory<IRestResponse>.Create(asyncPolicy2);
             IRestRequest request1 = new RestRequest(Method.GET);
             client1.BaseUrl = new Uri("https://httpstat.us/500");
-            var response5 = client1.Execute(request1);
+            var response5 = await client1.ExecuteAsync(request1);
             Console.ReadKey();
 
 
+
+            //async (no result)
+            ////https://github.com/App-vNext/Polly/wiki/Non-generic-and-generic-policies
+            var noResultaAyncPolicy = BuildTimeoutAndRetryAsyncPolicy(3, 2, 10);
+
+            var client2Async = RestClientFactory.Create(noResultaAyncPolicy);
+            client2Async.BaseUrl = new Uri("https://httpstat.us/500");
+            IRestRequest request3 = new RestRequest(Method.GET);
+            //if runtime have errors ,it will retry.
+            var response2 = await client2Async.ExecuteAsync(null);
+            Console.ReadKey();
+
+            //sync (no result)  /// To uncomment to try
+            //https://github.com/App-vNext/Polly/wiki/Non-generic-and-generic-policies
+            var syncPolicy2 = BuildTimeoutAndRetryPolicy(3, 2, 10);
+            var syncClient2 = RestClientFactory.Create(syncPolicy2);
+            IRestRequest request2 = new RestRequest(Method.GET);
+            syncClient2.BaseUrl = new Uri("https://httpstat.us/500");
+            //if runtime have errors ,it will retry.
+            var response4 = syncClient2.Execute(null);
+            Console.ReadKey();
+
+            ////sync
+            /// To uncomment to try
+            var syncPolicy3 = BuildTimeoutAndRetryPolicy2(3, 2, 10);
+            var syncclient3 = RestClientFactory<IRestResponse>.Create(syncPolicy3);
+            IRestRequest request4 = new RestRequest(Method.GET);
+            syncclient3.BaseUrl = new Uri("https://httpstat.us/500");
+            //if runtime have errors ,it will retry.
+            var res = syncclient3.Execute(request4);
+            Console.ReadKey();
 
         }
 
@@ -142,9 +159,6 @@ namespace ConsoleApp2
                 });
 
             var timeout = Policy.Timeout<IRestResponse>(timeoutSeconds);
-
-            var policyWrap = Policy.Wrap(timeout, retry);
-
             return Policy.Wrap(retry, timeout);
         }
 
@@ -153,7 +167,8 @@ namespace ConsoleApp2
             var logger = new LoggerConfiguration().MinimumLevel.Verbose().Enrich.FromLogContext()
                 .WriteTo.ColoredConsole().CreateLogger();
             var retry = Policy
-                .Handle<Exception>()
+                .Handle<Exception>().Or<NullReferenceException>()
+
                 .WaitAndRetry(retryNumber, retryAttempt => TimeSpan.FromMilliseconds(//ignore retrySleep, set to 5 seconds
                     5000), onRetry: (exception, calculatedWaitDuration) =>
                 {
@@ -164,9 +179,6 @@ namespace ConsoleApp2
                 });
 
             var timeout = Policy.Timeout(timeoutSeconds);
-
-            var policyWrap = Policy.Wrap(timeout, retry);
-
             return Policy.Wrap(retry, timeout);
         }
 
@@ -186,19 +198,16 @@ namespace ConsoleApp2
                 });
 
             var timeout = Policy.TimeoutAsync<IRestResponse>(timeoutSeconds);
-
-            var policyWrap = Policy.WrapAsync(timeout, retry);
-
             return Policy.WrapAsync(retry, timeout);
         }
 
-        public static IAsyncPolicy<IRestResponse<QueryResult>> BuildTimeoutAndRetryAsyncPolicy3(int retryNumber, int retrySleep, int timeoutSeconds)
+        public static IAsyncPolicy<IRestResponse<QueryResultModel>> BuildTimeoutAndRetryAsyncPolicy3(int retryNumber, int retrySleep, int timeoutSeconds)
         {
             var logger = new LoggerConfiguration().MinimumLevel.Verbose().Enrich.FromLogContext()
                 .WriteTo.ColoredConsole().CreateLogger();
             var retry = Policy
                 .Handle<Exception>()
-                .OrResult<IRestResponse<QueryResult>>(r => (int)r.StatusCode == 500)
+                .OrResult<IRestResponse<QueryResultModel>>(r => (int)r.StatusCode == 500)
                 .WaitAndRetryAsync(retryNumber, retryAttempt => TimeSpan.FromMilliseconds(5000 * retryNumber * retrySleep),
                     onRetry: (exception, calculatedWaitDuration) =>
                     {
@@ -207,9 +216,7 @@ namespace ConsoleApp2
                         Console.WriteLine("I am Console.WriteLine");
                     });
 
-            var timeout = Policy.TimeoutAsync<IRestResponse<QueryResult>>(timeoutSeconds);
-
-            var policyWrap = Policy.WrapAsync(timeout, retry);
+            var timeout = Policy.TimeoutAsync<IRestResponse<QueryResultModel>>(timeoutSeconds);
 
             return Policy.WrapAsync(retry, timeout);
         }
@@ -219,7 +226,7 @@ namespace ConsoleApp2
             var logger = new LoggerConfiguration().MinimumLevel.Verbose().Enrich.FromLogContext()
                 .WriteTo.ColoredConsole().CreateLogger();
             var retry = Policy
-                .Handle<Exception>()
+                .Handle<Exception>().Or<AggregateException>()
                 .WaitAndRetryAsync(retryNumber, retryAttempt => TimeSpan.FromMilliseconds(5000),
                     onRetry: (exception, calculatedWaitDuration) =>
                     {
@@ -227,11 +234,7 @@ namespace ConsoleApp2
                         logger.Information($"Policy logging onRetry {re.ToString()} times , response content is {exception.Message}and error is :");
                         Console.WriteLine("I am Console.WriteLine");
                     });
-
             var timeout = Policy.TimeoutAsync(timeoutSeconds);
-
-            var policyWrap = Policy.WrapAsync(timeout, retry);
-
             return Policy.WrapAsync(retry, timeout);
         }
 
