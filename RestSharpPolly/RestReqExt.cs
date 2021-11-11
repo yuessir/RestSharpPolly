@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using RestSharp;
@@ -42,8 +43,10 @@ namespace RestSharpPolly
 
             throw new Exception("unhandled policy fault, no result");
         }
+     
         public static Task<IRestResponse> GetPolicyTaskResult(this IRestRequest request, Task<PolicyResult<IRestResponse>> pr)
         {
+       
             if (pr.Result.Outcome == OutcomeType.Successful)
                 return Task.FromResult(pr.Result.Result);
 

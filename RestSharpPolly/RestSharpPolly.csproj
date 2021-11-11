@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net452;net46;net461;net47;net472;netstandard2.1;netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
+	  <TargetFrameworks>net452;net46;net461;net47;net472;netstandard2.1;netcoreapp3.0;netcoreapp3.1;netcoreapp6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Polly" Version="7.2.1" />
-    <PackageReference Include="RestSharp" Version="106.11.4" />
+    <PackageReference Include="Polly" Version="7.2.2" />
+    <PackageReference Include="RestSharp" Version="106.13.0" />
   </ItemGroup>
 
 </Project>

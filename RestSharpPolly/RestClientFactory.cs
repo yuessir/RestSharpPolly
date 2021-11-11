@@ -96,7 +96,7 @@ namespace RestSharpPolly
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return ExecutePolly(x => x.Execute(request, httpMethod), request, _pollyRetPolicy);
-          
+
         }
 
         public IRestResponse<T> Execute<T>(IRestRequest request)
@@ -104,7 +104,7 @@ namespace RestSharpPolly
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return ExecutePolly<T>(x => x.Execute<T>(request), request, _pollyRetPolicy);
-            
+
 
         }
 
@@ -113,7 +113,7 @@ namespace RestSharpPolly
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return ExecutePolly<T>(x => x.Execute<T>(request, httpMethod), request, _pollyRetPolicy);
-            
+
         }
 
         public byte[] DownloadData(IRestRequest request)
@@ -156,7 +156,7 @@ namespace RestSharpPolly
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return ExecutePolly(x => x.ExecuteAsGet(request, httpMethod), request, _pollyRetPolicy);
-           
+
         }
 
         public IRestResponse ExecuteAsPost(IRestRequest request, string httpMethod)
@@ -164,7 +164,7 @@ namespace RestSharpPolly
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return ExecutePolly(x => x.ExecuteAsPost(request, httpMethod), request, _pollyRetPolicy);
-           
+
         }
 
         public IRestResponse<T> ExecuteAsGet<T>(IRestRequest request, string httpMethod)
@@ -172,7 +172,7 @@ namespace RestSharpPolly
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return ExecutePolly<T>(x => x.ExecuteAsGet<T>(request, httpMethod), request, _pollyRetPolicy);
-            
+
         }
 
         public IRestResponse<T> ExecuteAsPost<T>(IRestRequest request, string httpMethod)
@@ -180,7 +180,7 @@ namespace RestSharpPolly
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return ExecutePolly<T>(x => x.ExecuteAsPost<T>(request, httpMethod), request, _pollyRetPolicy);
-           
+
         }
 
         public async Task<IRestResponse<T>> ExecuteAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
@@ -189,7 +189,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyTAsync<T>(x =>
                 x.ExecuteAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicy);
-          
+
         }
 
         public async Task<IRestResponse<T>> ExecuteAsync<T>(IRestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
@@ -198,7 +198,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyTAsync<T>(x =>
                 x.ExecuteAsync<T>(request, httpMethod, cancellationToken), request, _pollyRetAsyncPolicy);
-           
+
         }
 
         public async Task<IRestResponse> ExecuteAsync(IRestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
@@ -207,7 +207,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecuteAsync(request, httpMethod, cancellationToken), request, _pollyRetAsyncPolicy);
-           
+
         }
 
         public async Task<IRestResponse> ExecuteAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
@@ -216,7 +216,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecuteAsync(request, cancellationToken), request, _pollyRetAsyncPolicy);
-           
+
         }
 
         public async Task<IRestResponse<T>> ExecuteGetAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
@@ -225,7 +225,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyTAsync<T>(x =>
                 x.ExecuteGetAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicy);
-           
+
         }
 
         public async Task<IRestResponse<T>> ExecutePostAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
@@ -234,7 +234,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyTAsync<T>(x =>
                 x.ExecutePostAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicy);
-           
+
         }
 
         public async Task<IRestResponse> ExecuteGetAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
@@ -243,7 +243,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecuteGetAsync(request, cancellationToken), request, _pollyRetAsyncPolicy);
-           
+
         }
 
         public async Task<IRestResponse> ExecutePostAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
@@ -252,7 +252,7 @@ namespace RestSharpPolly
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecutePostAsync(request, cancellationToken), request, _pollyRetAsyncPolicy);
-           
+
         }
 
         public CookieContainer CookieContainer
