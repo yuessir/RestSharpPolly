@@ -22,7 +22,7 @@ namespace RestSharpPolly
     {
         private static readonly Lazy<RestClientFactory<TResult>> LazyRestFac = new Lazy<RestClientFactory<TResult>>(() => new RestClientFactory<TResult>());
         private static readonly Lazy<IRestClient> LazyRestClient = new Lazy<IRestClient>(() => new RestClient());
-        private ISyncPolicy<IRestResponse> _pollyRetPolicyGeneric;
+        private ISyncPolicy<TResult> _pollyRetPolicyGeneric;
         private IAsyncPolicy<TResult> _pollyRetAsyncPolicyGeneric;
         private static RestClientFactory<TResult> InstanceRestClient => LazyRestFac.Value;
         private static IRestClient _innerService => LazyRestClient.Value;
@@ -63,7 +63,7 @@ namespace RestSharpPolly
         }
         public RestClientFactory<TResult> SetPolicy(ISyncPolicy<TResult> syncPolicyGeneric)
         {
-            _pollyRetPolicyGeneric = (ISyncPolicy<IRestResponse>)syncPolicyGeneric;
+            _pollyRetPolicyGeneric = (ISyncPolicy<TResult>)syncPolicyGeneric;
             return InstanceRestClient;
         }
 
@@ -112,7 +112,7 @@ namespace RestSharpPolly
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.Execute(request), request, _pollyRetPolicyGeneric);
+            return ExecutePollyT<T, IRestResponse>(x => x.Execute(request), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
 
         }
 
@@ -120,7 +120,7 @@ namespace RestSharpPolly
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.Execute(request, httpMethod), request, _pollyRetPolicyGeneric);
+            return ExecutePollyT<T, IRestResponse>(x => x.Execute(request, httpMethod), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
 
         }
 
@@ -179,7 +179,7 @@ namespace RestSharpPolly
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.ExecuteAsGet<T>(request, httpMethod), request, _pollyRetPolicyGeneric);
+            return ExecutePollyT<T, IRestResponse>(x => x.ExecuteAsGet<T>(request, httpMethod), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
 
         }
 
@@ -187,7 +187,7 @@ namespace RestSharpPolly
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.ExecuteAsPost<T>(request, httpMethod), request, _pollyRetPolicyGeneric);
+            return ExecutePollyT<T, IRestResponse>(x => x.ExecuteAsPost<T>(request, httpMethod), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
 
         }
 

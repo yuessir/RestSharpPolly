@@ -28,7 +28,7 @@ namespace RestSharpPolly
         protected delegate IRestResponse<T> SyncInterceptorT<T>(IRestRequest req, Func<IRestResponse<T>> exec);
         protected delegate IRestResponse SyncInterceptor(IRestRequest req, Func<IRestResponse> exec);
 
-        protected delegate Task<IRestResponse> AsyncInterceptor2(IRestRequest req, Func<IRestResponse> exec);
+      
         protected IRestResponse ExecutePolly(Expression<RestClientCarrier> methodLambda, IRestRequest request, ISyncPolicy policy)
 
         {
