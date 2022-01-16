@@ -19,10 +19,10 @@ RestClientFactory<TResult> Create(ISyncPolicy<TResult> syncPolicy)
 # Install
 Import RestSharpPolly into an existing project
 
-    Go to the project folder of the application and install the Nuget package reference
+    Go to the project folder of the application and install the Nuget package reference:
 
 ````command
-     $ dotnet add package RestSharpPolly
+$ dotnet add package RestSharpPolly
 ````
     
 
