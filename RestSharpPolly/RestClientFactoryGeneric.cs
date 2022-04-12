@@ -10,643 +10,409 @@ using System.Threading.Tasks;
 using Polly;
 using RestSharp;
 using RestSharp.Authenticators;
-using RestSharp.Deserializers;
-using RestSharp.Serialization;
+using RestSharp.Serializers;
 
 namespace RestSharpPolly
 {
+    public interface IRestClient<TResult> where TResult : RestResponse
+    {
+        RestClientOptions RestClientOptions { get; set; }
+        RestClientFactory<TResult> Build(RestClientOptions options);
+    }
+
     /// <summary>
     /// A REST client factory.
     /// </summary>
-    public class RestClientFactory<TResult> : RestClientBase, IRestClient where TResult : IRestResponse
+    public class RestClientFactory<TResult> : RestClientBase, IRestClient<TResult> where TResult : RestResponse
     {
-        private static readonly Lazy<RestClientFactory<TResult>> LazyRestFac = new Lazy<RestClientFactory<TResult>>(() => new RestClientFactory<TResult>());
-        private static readonly Lazy<IRestClient> LazyRestClient = new Lazy<IRestClient>(() => new RestClient());
-        private ISyncPolicy<TResult> _pollyRetPolicyGeneric;
-        private IAsyncPolicy<TResult> _pollyRetAsyncPolicyGeneric;
-        private static RestClientFactory<TResult> InstanceRestClient => LazyRestFac.Value;
-        private static IRestClient _innerService => LazyRestClient.Value;
-
-
-        private RestClientFactory() : base(_innerService)
+        private ISyncPolicy<TResult> _pollyRetPolicyGeneric { get; set; }
+        public ISyncPolicy<TResult> PollyRetPolicyGeneric
         {
+            get => _pollyRetPolicyGeneric;
+            set => _pollyRetPolicyGeneric = value;
         }
 
-        public static IRestClient Create()
+        private IAsyncPolicy<TResult> _pollyRetAsyncPolicyGeneric { get; set; }
+        public IAsyncPolicy<TResult> PollyRetAsyncPolicyGeneric
         {
-            return _innerService;
+            get => _pollyRetAsyncPolicyGeneric;
+            set => _pollyRetAsyncPolicyGeneric = value;
         }
 
-        public static RestClientFactory<TResult> Create(ISyncPolicy<TResult> syncPolicy)
+        private RestClientFactory<TResult> _instanceRestClient;
+
+        public RestClientFactory<TResult> InstanceRestClient
         {
-            return InstanceRestClient.SetPolicy(syncPolicy);
+            get
+            {
+                if (_instanceRestClient == null)
+                {
+                    _instanceRestClient = new RestClientFactory<TResult>();
+
+                    return _instanceRestClient;
+                }
+
+
+                return _instanceRestClient;
+            }
+            set => _instanceRestClient = value;
         }
 
-        public static RestClientFactory<TResult> Create(IAsyncPolicy<TResult> asyncPolicy)
+
+        private RestClient _innerService;
+        public RestClientOptions RestClientOptions { get; set; }
+
+
+        public RestClientFactory<TResult> Create()
         {
-            return InstanceRestClient.SetAsyncPolicy(asyncPolicy);
+            base._innerClient = _innerService;
+            RestClientOptions = new RestClientOptions();
+            return this;
         }
-        public static RestClientFactory<TResult> Create<T>(IAsyncPolicy<TResult> asyncPolicy)
+        public RestClientFactory<TResult> Build(RestClientOptions options)
         {
-            return InstanceRestClient.SetAsyncPolicy<T>(asyncPolicy);
+
+            if (options == null)
+            {
+                options = new RestClientOptions(); ;
+            }
+            _innerService = new RestClient(options);
+            base._innerClient = _innerService;
+
+            return this;
         }
 
-        public RestClientFactory<TResult> SetAsyncPolicy(IAsyncPolicy<TResult> asyncPolicyGeneric)
+        public IRestClient<TResult> Create(ISyncPolicy<TResult> syncPolicy)
+        {
+            SetPolicy(syncPolicy);
+            return this;
+        }
+
+        public IRestClient<TResult> Create(IAsyncPolicy<TResult> asyncPolicy)
+        {
+            SetAsyncPolicy(asyncPolicy);
+            return this;
+        }
+        public IRestClient<TResult> Create<T>(IAsyncPolicy<TResult> asyncPolicy)
+        {
+            SetAsyncPolicy<T>(asyncPolicy);
+            return this;
+        }
+
+        public void SetAsyncPolicy(IAsyncPolicy<TResult> asyncPolicyGeneric)
         {
             _pollyRetAsyncPolicyGeneric = (IAsyncPolicy<TResult>)asyncPolicyGeneric;
-            return InstanceRestClient;
         }
-        public RestClientFactory<TResult> SetAsyncPolicy<T>(IAsyncPolicy<TResult> asyncPolicyGeneric)
+        public void SetAsyncPolicy<T>(IAsyncPolicy<TResult> asyncPolicyGeneric)
         {
             _pollyRetAsyncPolicyGeneric = (IAsyncPolicy<TResult>)asyncPolicyGeneric;
-            return InstanceRestClient;
         }
-        public RestClientFactory<TResult> SetPolicy(ISyncPolicy<TResult> syncPolicyGeneric)
+        public void SetPolicy(ISyncPolicy<TResult> syncPolicyGeneric)
         {
             _pollyRetPolicyGeneric = (ISyncPolicy<TResult>)syncPolicyGeneric;
-            return InstanceRestClient;
+
         }
 
-        public IRestClient UseSerializer(Func<IRestSerializer> serializerFactory)
+        public RestClient UseSerializer(Func<IRestSerializer> serializerFactory)
         {
             return _innerService.UseSerializer(serializerFactory);
         }
 
-        public IRestClient UseSerializer<T>() where T : IRestSerializer, new()
+        public RestClient UseSerializer<T>() where T : class, IRestSerializer, new()
         {
             return _innerService.UseSerializer<T>();
         }
 
-        public IRestResponse<T> Deserialize<T>(IRestResponse response)
+        public RestResponse<T> Deserialize<T>(RestResponse response)
         {
             return _innerService.Deserialize<T>(response);
         }
 
-        public IRestClient UseUrlEncoder(Func<string, string> encoder)
+        public RestClient UseUrlEncoder(Func<string, string> encoder)
         {
             return _innerService.UseUrlEncoder(encoder);
         }
 
-        public IRestClient UseQueryEncoder(Func<string, Encoding, string> queryEncoder)
+        public RestClient UseQueryEncoder(Func<string, Encoding, string> queryEncoder)
         {
             return _innerService.UseQueryEncoder(queryEncoder);
         }
-
-        public IRestResponse Execute(IRestRequest request)
+        /// <summary>
+        /// According to the official documents, all the synchronous methods are gone. If you absolutely must call without using async and await, use GetAwaiter().GetResult() blocking call.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Obsolete("Using Async Method, next version will deprecate the method.")]
+        public RestResponse Execute(RestRequest request)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePolly(x => x.Execute(request), request, _pollyRetPolicyGeneric);
+            return ExecutePolly(x => x.ExecuteAsync(request, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric);
 
         }
-
-        public IRestResponse Execute(IRestRequest request, Method httpMethod)
+        /// <summary>
+        /// According to the official documents, all the synchronous methods are gone. If you absolutely must call without using async and await, use GetAwaiter().GetResult() blocking call.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Obsolete("Using Async Method, next version will deprecate the method.")]
+        public RestResponse Execute(RestRequest request, Method httpMethod)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePolly(x => x.Execute(request, httpMethod), request, _pollyRetPolicyGeneric);
+            return ExecutePolly(x => x.ExecuteAsync(request, httpMethod, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric);
 
         }
-
-        public IRestResponse<T> Execute<T>(IRestRequest request)
+        /// <summary>
+        /// According to the official documents, all the synchronous methods are gone. If you absolutely must call without using async and await, use GetAwaiter().GetResult() blocking call.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Obsolete("Using Async Method, next version will deprecate the method.")]
+        public RestResponse<T> Execute<T>(RestRequest request)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.Execute(request), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
+            return ExecutePollyT<T, RestResponse>(x => x.ExecuteAsync(request, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric as ISyncPolicy<RestResponse>);
 
         }
-
-        public IRestResponse<T> Execute<T>(IRestRequest request, Method httpMethod)
+        /// <summary>
+        /// According to the official documents, all the synchronous methods are gone. If you absolutely must call without using async and await, use GetAwaiter().GetResult() blocking call.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Obsolete("Using Async Method, next version will deprecate the method.")]
+        public RestResponse<T> Execute<T>(RestRequest request, Method httpMethod)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.Execute(request, httpMethod), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
+            return ExecutePollyT<T, RestResponse>(x => x.ExecuteAsync(request, httpMethod, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric as ISyncPolicy<RestResponse>);
 
         }
 
-        public byte[] DownloadData(IRestRequest request)
+        public byte[] DownloadData(RestRequest request)
         {
-            return _innerService.DownloadData(request);
+            return _innerService.DownloadDataAsync(request).GetAwaiter().GetResult();
         }
 
-        public Uri BuildUri(IRestRequest request)
+        public Uri BuildUri(RestRequest request)
         {
             return _innerService.BuildUri(request);
         }
-
-        public string BuildUriWithoutQueryParameters(IRestRequest request)
+        [Obsolete("deprecated the method.", true)]
+        public string BuildUriWithoutQueryParameters(RestRequest request)
         {
-            return _innerService.BuildUriWithoutQueryParameters(request);
+            throw new Exception("deprecated the method.");
         }
-
+        [Obsolete("deprecated the method.", true)]
         public void ConfigureWebRequest(Action<HttpWebRequest> configurator)
         {
-            _innerService.ConfigureWebRequest(configurator);
+            throw new Exception("deprecated the method.");
         }
-
+        [Obsolete("deprecated the method.", true)]
         public void AddHandler(string contentType, Func<IDeserializer> deserializerFactory)
         {
-            _innerService.AddHandler(contentType, deserializerFactory);
+            throw new Exception("deprecated the method.");
         }
-
+        [Obsolete("deprecated the method.", true)]
         public void RemoveHandler(string contentType)
         {
-            _innerService.RemoveHandler(contentType);
+            throw new Exception("deprecated the method.");
         }
-
+        [Obsolete("deprecated the method.", true)]
         public void ClearHandlers()
         {
-            _innerService.ClearHandlers();
+            throw new Exception("deprecated the method.");
         }
 
-        public IRestResponse ExecuteAsGet(IRestRequest request, string httpMethod)
+        public RestResponse ExecuteAsGet(RestRequest request, string httpMethod)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePolly(x => x.ExecuteAsGet(request, httpMethod), request, _pollyRetPolicyGeneric);
+
+            if (!string.IsNullOrEmpty(httpMethod))
+            {
+                return ExecutePolly(x => x.ExecuteAsync(request, (Method)Enum.Parse(typeof(Method), httpMethod), default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric);
+
+            }
+            return ExecutePolly(x => x.ExecuteGetAsync(request, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric);
 
         }
 
-        public IRestResponse ExecuteAsPost(IRestRequest request, string httpMethod)
+        public RestResponse ExecuteAsPost(RestRequest request, string httpMethod)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePolly(x => x.ExecuteAsPost(request, httpMethod), request, _pollyRetPolicyGeneric);
+
+            if (!string.IsNullOrEmpty(httpMethod))
+            {
+                return ExecutePolly(x => x.ExecuteAsync(request, (Method)Enum.Parse(typeof(Method), httpMethod), default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric);
+
+            }
+            return ExecutePolly(x => x.ExecutePostAsync(request, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric);
+
 
         }
 
-        public IRestResponse<T> ExecuteAsGet<T>(IRestRequest request, string httpMethod)
+        public RestResponse<T> ExecuteAsGet<T>(RestRequest request, string httpMethod)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.ExecuteAsGet<T>(request, httpMethod), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
+
+            if (!string.IsNullOrEmpty(httpMethod))
+            {
+                return ExecutePollyT<T, RestResponse>(x => x.ExecuteAsync<T>(request, (Method)Enum.Parse(typeof(Method), httpMethod), default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric as ISyncPolicy<RestResponse>);
+
+            }
+            return ExecutePollyT<T, RestResponse>(x => x.ExecuteGetAsync<T>(request, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric as ISyncPolicy<RestResponse>);
+
 
         }
 
-        public IRestResponse<T> ExecuteAsPost<T>(IRestRequest request, string httpMethod)
+        public RestResponse<T> ExecuteAsPost<T>(RestRequest request, string httpMethod)
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return ExecutePollyT<T, IRestResponse>(x => x.ExecuteAsPost<T>(request, httpMethod), request, _pollyRetPolicyGeneric as ISyncPolicy<IRestResponse>);
+
+            if (!string.IsNullOrEmpty(httpMethod))
+            {
+                return ExecutePollyT<T, RestResponse>(x => x.ExecuteAsync<T>(request, (Method)Enum.Parse(typeof(Method), httpMethod), default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric as ISyncPolicy<RestResponse>);
+
+            }
+            return ExecutePollyT<T, RestResponse>(x => x.ExecutePostAsync<T>(request, default).GetAwaiter().GetResult(), request, _pollyRetPolicyGeneric as ISyncPolicy<RestResponse>);
 
         }
 
-        public async Task<IRestResponse<T>> ExecuteAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse<T>> ExecuteAsync<T>(RestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return await ExecutePollyTAsync<T, IRestResponse<T>>(x =>
-            x.ExecuteAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<IRestResponse<T>>);
+            return await ExecutePollyTAsync<T, RestResponse<T>>(x =>
+            x.ExecuteAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<RestResponse<T>>);
 
         }
 
-        public async Task<IRestResponse<T>> ExecuteAsync<T>(IRestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse<T>> ExecuteAsync<T>(RestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return await ExecutePollyTAsync<T, IRestResponse<T>>(x =>
-                x.ExecuteAsync<T>(request, httpMethod, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<IRestResponse<T>>);
+            return await ExecutePollyTAsync<T, RestResponse<T>>(x =>
+                x.ExecuteAsync<T>(request, httpMethod, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<RestResponse<T>>);
 
         }
 
-        public async Task<IRestResponse> ExecuteAsync(IRestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse> ExecuteAsync(RestRequest request, Method httpMethod, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecuteAsync(request, httpMethod, cancellationToken), request, _pollyRetAsyncPolicyGeneric);
-           
+
         }
 
-        public async Task<IRestResponse> ExecuteAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse> ExecuteAsync(RestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecuteAsync(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric);
-          
+
         }
 
-        public async Task<IRestResponse<T>> ExecuteGetAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse<T>> ExecuteGetAsync<T>(RestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return await ExecutePollyTAsync<T, IRestResponse<T>>(x =>
-                x.ExecuteGetAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<IRestResponse<T>>);
-            
+            return await ExecutePollyTAsync<T, RestResponse<T>>(x =>
+                x.ExecuteGetAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<RestResponse<T>>);
+
         }
 
-        public async Task<IRestResponse<T>> ExecutePostAsync<T>(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse<T>> ExecutePostAsync<T>(RestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
-            return await ExecutePollyTAsync<T, IRestResponse<T>>(x =>
-                x.ExecutePostAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<IRestResponse<T>>);
-            
+            return await ExecutePollyTAsync<T, RestResponse<T>>(x =>
+                x.ExecutePostAsync<T>(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric as IAsyncPolicy<RestResponse<T>>);
+
         }
 
-        public async Task<IRestResponse> ExecuteGetAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse> ExecuteGetAsync(RestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecuteGetAsync(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric);
-          
+
         }
 
-        public async Task<IRestResponse> ExecutePostAsync(IRestRequest request, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<RestResponse> ExecutePostAsync(RestRequest request, CancellationToken cancellationToken = new CancellationToken())
         {
             if (null == request)
                 throw new AggregateException(nameof(request) + " is  null");
             return await ExecutePollyAsync(x =>
                 x.ExecutePostAsync(request, cancellationToken), request, _pollyRetAsyncPolicyGeneric);
-          
+
         }
 
-        public CookieContainer CookieContainer
-        {
-            get => _innerService.CookieContainer;
-            set => _innerService.CookieContainer = value;
-        }
 
-        public bool AutomaticDecompression
-        {
-            get => _innerService.AutomaticDecompression;
-            set => _innerService.AutomaticDecompression = value;
-        }
 
-        public int? MaxRedirects
-        {
-            get => _innerService.MaxRedirects;
-            set => _innerService.MaxRedirects = value;
-        }
+        [Obsolete("Not supported")]
+        public CookieContainer CookieContainer { get; set; }
+        [Obsolete("Not supported")]
+        public bool AutomaticDecompression { get; set; }
+        [Obsolete("Not supported")]
+        public int? MaxRedirects { get; set; }
+        [Obsolete("Not supported")]
+        public string UserAgent { get; set; }
+        [Obsolete("Not supported")]
+        public int Timeout { get; set; }
 
-        public string UserAgent
-        {
-            get => _innerService.UserAgent;
-            set => _innerService.UserAgent = value;
-        }
-
-        public int Timeout
-        {
-            get => _innerService.Timeout;
-            set => _innerService.Timeout = value;
-        }
-
-        public int ReadWriteTimeout
-        {
-            get => _innerService.ReadWriteTimeout;
-            set => _innerService.ReadWriteTimeout = value;
-        }
-
-        public bool UseSynchronizationContext
-        {
-            get => _innerService.UseSynchronizationContext;
-            set => _innerService.UseSynchronizationContext = value;
-        }
-
+        [Obsolete("Not supported", true)]
+        public int ReadWriteTimeout { get; set; }
+        [Obsolete("Not supported", true)]
+        public bool UseSynchronizationContext { get; set; }
+        [Obsolete("Not supported")]
         public IAuthenticator Authenticator
         {
             get => _innerService.Authenticator;
             set => _innerService.Authenticator = value;
         }
+        [Obsolete("Not supported")]
+        public Uri BaseUrl { get; set; }
+
+        [Obsolete("Not supported")]
+        public Encoding Encoding { get; set; }
+        [Obsolete("Not supported")]
+        public bool ThrowOnDeserializationError { get; set; }
+        [Obsolete("Not supported")]
+        public bool FailOnDeserializationError { get; set; }
+        [Obsolete("Not supported")]
+        public bool ThrowOnAnyError { get; set; }
+        [Obsolete("Not supported", true)]
+        public string ConnectionGroupName { get; set; }
+        [Obsolete("Not supported")]
+        public bool PreAuthenticate { get; set; }
+        [Obsolete("Not supported", true)]
+        public bool UnsafeAuthenticatedConnectionSharing { get; set; }
+        [Obsolete("Not supported")]
+        public string BaseHost { get; set; }
+        [Obsolete("Not supported")]
+        public bool AllowMultipleDefaultParametersWithSameName { get; set; }
+        [Obsolete("Not supported")]
+        public X509CertificateCollection ClientCertificates { get; set; }
+        [Obsolete("Not supported")]
+        public IWebProxy Proxy { get; set; }
+        [Obsolete("Not supported")]
+        public RequestCachePolicy CachePolicy { get; set; }
+        [Obsolete("Not supported", true)]
+        public bool Pipelined { get; set; }
+        [Obsolete("Not supported")]
+        public bool FollowRedirects { get; set; }
+        [Obsolete("Not supported")]
+        public RemoteCertificateValidationCallback RemoteCertificateValidationCallback { get; set; }
 
-        public Uri BaseUrl
-        {
-            get => _innerService.BaseUrl;
-            set => _innerService.BaseUrl = value;
-        }
 
-        public Encoding Encoding
-        {
-            get => _innerService.Encoding;
-            set => _innerService.Encoding = value;
-        }
-
-        public bool ThrowOnDeserializationError
-        {
-            get => _innerService.ThrowOnDeserializationError;
-            set => _innerService.ThrowOnDeserializationError = value;
-        }
-
-        public bool FailOnDeserializationError
-        {
-            get => _innerService.FailOnDeserializationError;
-            set => _innerService.FailOnDeserializationError = value;
-        }
-
-        public bool ThrowOnAnyError
-        {
-            get => _innerService.ThrowOnAnyError;
-            set => _innerService.ThrowOnAnyError = value;
-        }
-
-        public string ConnectionGroupName
-        {
-            get => _innerService.ConnectionGroupName;
-            set => _innerService.ConnectionGroupName = value;
-        }
-
-        public bool PreAuthenticate
-        {
-            get => _innerService.PreAuthenticate;
-            set => _innerService.PreAuthenticate = value;
-        }
-
-        public bool UnsafeAuthenticatedConnectionSharing
-        {
-            get => _innerService.UnsafeAuthenticatedConnectionSharing;
-            set => _innerService.UnsafeAuthenticatedConnectionSharing = value;
-        }
-
-        public IList<Parameter> DefaultParameters => _innerService.DefaultParameters;
-
-        public string BaseHost
-        {
-            get => _innerService.BaseHost;
-            set => _innerService.BaseHost = value;
-        }
-
-        public bool AllowMultipleDefaultParametersWithSameName
-        {
-            get => _innerService.AllowMultipleDefaultParametersWithSameName;
-            set => _innerService.AllowMultipleDefaultParametersWithSameName = value;
-        }
-
-        public X509CertificateCollection ClientCertificates
-        {
-            get => _innerService.ClientCertificates;
-            set => _innerService.ClientCertificates = value;
-        }
-
-        public IWebProxy Proxy
-        {
-            get => _innerService.Proxy;
-            set => _innerService.Proxy = value;
-        }
-
-        public RequestCachePolicy CachePolicy
-        {
-            get => _innerService.CachePolicy;
-            set => _innerService.CachePolicy = value;
-        }
-
-        public bool Pipelined
-        {
-            get => _innerService.Pipelined;
-            set => _innerService.Pipelined = value;
-        }
-
-        public bool FollowRedirects
-        {
-            get => _innerService.FollowRedirects;
-            set => _innerService.FollowRedirects = value;
-        }
-
-        public RemoteCertificateValidationCallback RemoteCertificateValidationCallback
-        {
-            get => _innerService.RemoteCertificateValidationCallback;
-            set => _innerService.RemoteCertificateValidationCallback = value;
-        }
-
-        #region Obsolete Methods
-
-        [Obsolete]
-        public byte[] DownloadData(IRestRequest request, bool throwOnError)
-        {
-            return _innerService.DownloadData(request, throwOnError);
-        }
-
-        [Obsolete]
-        public IRestClient UseSerializer(IRestSerializer serializer)
-        {
-            return _innerService.UseSerializer(serializer);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsync(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback)
-        {
-            return _innerService.ExecuteAsync(request, callback);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsync<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback)
-        {
-            return _innerService.ExecuteAsync<T>(request, callback);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsync(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback, Method httpMethod)
-        {
-            return _innerService.ExecuteAsync(request, callback, httpMethod);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsync<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback, Method httpMethod)
-        {
-            return _innerService.ExecuteAsync<T>(request, callback, httpMethod);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsyncGet(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback, string httpMethod)
-        {
-            return _innerService.ExecuteAsyncGet(request, callback, httpMethod);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsyncPost(IRestRequest request, Action<IRestResponse, RestRequestAsyncHandle> callback, string httpMethod)
-        {
-            return _innerService.ExecuteAsyncPost(request, callback, httpMethod);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsyncGet<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback, string httpMethod)
-        {
-            return _innerService.ExecuteAsyncGet(request, callback, httpMethod);
-        }
-
-        [Obsolete]
-        public RestRequestAsyncHandle ExecuteAsyncPost<T>(IRestRequest request, Action<IRestResponse<T>, RestRequestAsyncHandle> callback, string httpMethod)
-        {
-            return _innerService.ExecuteAsyncPost(request, callback, httpMethod);
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse<T>> ExecuteTaskAsync<T>(IRestRequest request)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteTaskAsync<T>(request));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse<T>> ExecuteTaskAsync<T>(IRestRequest request, CancellationToken token)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteTaskAsync<T>(request, token));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse<T>> ExecuteTaskAsync<T>(IRestRequest request, Method httpMethod)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteTaskAsync<T>(request, httpMethod));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse<T>> ExecuteGetTaskAsync<T>(IRestRequest request)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync<T>(request));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse<T>> ExecuteGetTaskAsync<T>(IRestRequest request, CancellationToken token)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync<T>(request, token));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync<T>(request));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse<T>> ExecutePostTaskAsync<T>(IRestRequest request, CancellationToken token)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return (IRestResponse<T>)await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostTaskAsync<T>(request, token));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse> ExecuteTaskAsync(IRestRequest request, CancellationToken token)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteTaskAsync(request, token));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse> ExecuteTaskAsync(IRestRequest request, CancellationToken token, Method httpMethod)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteTaskAsync(request, token, httpMethod));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse> ExecuteTaskAsync(IRestRequest request)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteTaskAsync(request));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse> ExecuteGetTaskAsync(IRestRequest request)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync(request));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse> ExecuteGetTaskAsync(IRestRequest request, CancellationToken token)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecuteGetTaskAsync(request, token));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse> ExecutePostTaskAsync(IRestRequest request)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostTaskAsync(request));
-        }
-
-        [Obsolete]
-        public async Task<IRestResponse> ExecutePostTaskAsync(IRestRequest request, CancellationToken token)
-        {
-            if (null == request)
-                return null;
-
-            if (null == _pollyRetAsyncPolicyGeneric)
-                return null;
-
-            return await _pollyRetAsyncPolicyGeneric.ExecuteAsync(async () => (TResult)await _innerService.ExecutePostTaskAsync(request, token));
-        }
-
-        [Obsolete]
-        public void AddHandler(string contentType, IDeserializer deserializer)
-        {
-            _innerService.AddHandler(contentType, deserializer);
-        }
-
-
-        #endregion
 
     }
 }

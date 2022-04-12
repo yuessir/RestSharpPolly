@@ -11,7 +11,7 @@ namespace RestSharpPolly
 {
     public static class RestReqExt
     {
-        public static IRestResponse GetPolicyResult(this IRestRequest request, PolicyResult<IRestResponse> pr)
+        public static RestResponse GetPolicyResult(this RestRequest request, PolicyResult<RestResponse> pr)
         {
             if (pr.Outcome == OutcomeType.Successful)
                 return pr.Result;
@@ -27,7 +27,7 @@ namespace RestSharpPolly
 
             throw new Exception("unhandled policy fault, no result");
         }
-        public static IRestResponse<T> GetPolicyResultT<T>(this IRestRequest request, PolicyResult<IRestResponse<T>> pr)
+        public static RestResponse<T> GetPolicyResultT<T>(this RestRequest request, PolicyResult<RestResponse<T>> pr)
         {
             if (pr.Outcome == OutcomeType.Successful)
                 return pr.Result;
@@ -44,7 +44,7 @@ namespace RestSharpPolly
             throw new Exception("unhandled policy fault, no result");
         }
      
-        public static Task<IRestResponse> GetPolicyTaskResult(this IRestRequest request, Task<PolicyResult<IRestResponse>> pr)
+        public static Task<RestResponse> GetPolicyTaskResult(this RestRequest request, Task<PolicyResult<RestResponse>> pr)
         {
        
             if (pr.Result.Outcome == OutcomeType.Successful)
@@ -61,7 +61,7 @@ namespace RestSharpPolly
 
             throw new Exception("unhandled policy fault, no result");
         }
-        public static Task<IRestResponse<T>> GetPolicyTaskResultT<T>(this IRestRequest request, Task<PolicyResult<IRestResponse<T>>> pr)
+        public static Task<RestResponse<T>> GetPolicyTaskResultT<T>(this RestRequest request, Task<PolicyResult<RestResponse<T>>> pr)
         {
             if (pr.Result.Outcome == OutcomeType.Successful)
                 return  Task.FromResult(pr.Result.Result);
