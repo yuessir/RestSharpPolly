@@ -62,7 +62,7 @@ namespace RestSharpPolly
         {
             base._innerClient = _innerService;
             RestClientOptions = new RestClientOptions();
-            return InstanceRestClient;
+            return this;
         }
 
         public RestClientOptions RestClientOptions { get; set; }

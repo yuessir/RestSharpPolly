@@ -40,7 +40,7 @@ namespace ConsoleApp2
             var client1 = new RestClientFactory<RestResponse>().Create(asyncPolicy2);
             var request1 = new RestRequest();
             
-            client1.RestClientOptions = new RestClientOptions(new Uri("https://httpstat.us/500"));
+            client1.RestClientOptions.BaseUrl = new Uri("https://httpstat.us/500");
             var host = client1.Build(client1.RestClientOptions);
             var response5 = await host.ExecuteAsync(request1);
             Console.ReadKey();
