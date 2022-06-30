@@ -38,8 +38,8 @@ namespace RestSharpPolly
             get => _pollyRetAsyncPolicy;
             set => _pollyRetAsyncPolicy = value;
         }
-        private RestClientFactory _instanceRestClient ;
-        public RestClientFactory InstanceRestClient
+        private static RestClientFactory _instanceRestClient ;
+        public static RestClientFactory InstanceRestClient
         {
             get
             {
@@ -80,13 +80,15 @@ namespace RestSharpPolly
         }
         public IRestClient Create(ISyncPolicy syncPolicy)
         {
-             SetPolicy(syncPolicy);
+            RestClientOptions = new RestClientOptions();
+            SetPolicy(syncPolicy);
              return this;
         }
       
         public IRestClient Create(IAsyncPolicy asyncPolicy)
         {
-             SetAsyncPolicy(asyncPolicy);
+            RestClientOptions = new RestClientOptions();
+            SetAsyncPolicy(asyncPolicy);
              return this;
         }
 

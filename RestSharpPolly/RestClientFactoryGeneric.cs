@@ -39,9 +39,9 @@ namespace RestSharpPolly
             set => _pollyRetAsyncPolicyGeneric = value;
         }
 
-        private RestClientFactory<TResult> _instanceRestClient;
+        private static RestClientFactory<TResult> _instanceRestClient;
 
-        public RestClientFactory<TResult> InstanceRestClient
+        public static RestClientFactory<TResult> InstanceRestClient
         {
             get
             {
@@ -84,17 +84,21 @@ namespace RestSharpPolly
 
         public IRestClient<TResult> Create(ISyncPolicy<TResult> syncPolicy)
         {
+            //todo: refactor
+            RestClientOptions = new RestClientOptions();
             SetPolicy(syncPolicy);
             return this;
         }
 
         public IRestClient<TResult> Create(IAsyncPolicy<TResult> asyncPolicy)
         {
+            RestClientOptions = new RestClientOptions();
             SetAsyncPolicy(asyncPolicy);
             return this;
         }
         public IRestClient<TResult> Create<T>(IAsyncPolicy<TResult> asyncPolicy)
         {
+            RestClientOptions = new RestClientOptions();
             SetAsyncPolicy<T>(asyncPolicy);
             return this;
         }

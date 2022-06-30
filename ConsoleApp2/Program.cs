@@ -39,13 +39,60 @@ namespace ConsoleApp2
             var asyncPolicy2 = BuildTimeoutAndRetryAsyncPolicy2(3, 2, 10);
             var client1 = new RestClientFactory<RestResponse>().Create(asyncPolicy2);
             var request1 = new RestRequest();
-            
             client1.RestClientOptions.BaseUrl = new Uri("https://httpstat.us/500");
             var host = client1.Build(client1.RestClientOptions);
             var response5 = await host.ExecuteAsync(request1);
             Console.ReadKey();
 
 
+            ////////async (no result)
+            //////////https://github.com/App-vNext/Polly/wiki/Non-generic-and-generic-policies
+            ////// To uncomment to try
+            //var noResultAyncPolicy = BuildTimeoutAndRetryAsyncPolicy(3, 2, 1);
+            //var client2Async = (new RestClientFactory()).Create(noResultAyncPolicy);
+            //var request2 = new RestRequest();
+            ////if runtime have errors ,it will retry.
+            //client2Async.RestClientOptions.BaseUrl = new Uri("https://httpstat.us/200?sleep=15000");
+            //var host2 = client2Async.Build(client2Async.RestClientOptions);
+            //var response2 = await host2.ExecuteAsync(request2);
+            //Console.ReadKey();
+
+            ////async
+            ///// To uncomment to try
+            //var noResultaAyncPolicyT = BuildTimeoutAndRetryAsyncPolicy3(3, 2, 10);
+            //var client3Async = (new RestClientFactory<RestResponse<QueryResultModel>>()).Create(noResultaAyncPolicyT);
+            //var request3 = new RestRequest();
+            ////if runtime have errors ,it will retry.
+            //client3Async.RestClientOptions.BaseUrl = new Uri("https://httpstat.us/500");
+            //var host3 = client3Async.Build(client3Async.RestClientOptions);
+            //var response6 = await host3.ExecuteAsync<QueryResultModel>(request3);
+            //Console.ReadKey();
+
+
+            //// To uncomment to try
+            ////sync (no result) 
+            ////https://github.com/App-vNext/Polly/wiki/Non-generic-and-generic-policies
+            //var syncPolicy2 = BuildTimeoutAndRetryPolicy(3, 2, 5);
+            //var syncClient4 = (new RestClientFactory()).Create(syncPolicy2);
+            //var request2 = new RestRequest();
+            //syncClient4.RestClientOptions.BaseUrl = new Uri("https://httpstat.us/200?sleep=15000");
+            ////if runtime have errors ,it will retry.
+            //var host4 = syncClient4.Build(syncClient4.RestClientOptions);
+            //var response4 = host4.Execute(request2);
+            //Console.ReadKey();
+
+            //////sync
+            ////To uncomment to try
+            //var syncPolicy3 = BuildTimeoutAndRetryPolicy2(3, 2, 1);
+            //var syncClient5 = (new RestClientFactory<RestResponse>()).Create(syncPolicy3);
+            //var request4 = new RestRequest();
+            //syncClient5.RestClientOptions.BaseUrl = new Uri("https://httpstat.us/500");
+            ////if runtime have errors ,it will retry.
+            //var host5 = syncClient5.Build(syncClient5.RestClientOptions);
+            //var res = host5.Execute(request4);
+            //Console.ReadKey();
+
+            //------------------------------------------------------ under V107 
             // demo for  under version of 107 
             // To uncomment to try
             ////async
