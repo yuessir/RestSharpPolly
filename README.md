@@ -44,3 +44,9 @@ About v107 branch
 **NOT fully tested, Not recommended for  production use unless you know what you're doing. :)**
 btw official RestSharp 107.3.0 is not compatible with .net45 /.net46 /.net47, so [RestSharpPolly](https://github.com/yuessir/RestSharpPolly) does not support for the frameworks.
 
+
+
+# Upgrading
+
+Simply `git pull` or `git rebase` the latest changes
+
